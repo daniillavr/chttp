@@ -1,66 +1,66 @@
 #include "http.h"
 
-char_t Methods[ MS_SIZE ][ MS_LEN ] =
+char Methods[ MS_SIZE ][ MS_LEN ] =
 	{
-		L"OPTIONS" ,
-		L"GET" ,
-		L"HEAD" ,
-		L"POST" ,
-		L"PUT" ,
-		L"DELETE" ,
-		L"TRACE" ,
-		L"CONNECT" ,
+		"OPTIONS" ,
+		"GET" ,
+		"HEAD" ,
+		"POST" ,
+		"PUT" ,
+		"DELETE" ,
+		"TRACE" ,
+		"CONNECT" ,
 	} ;
 
-char_t *
-wcsnac( char_t **dest , char_t *source , uint size )
+char *
+strnac( char **dest , char *source , uint size )
 {
 	if( !size )
 		*dest = NULL ;
 	else
 	{
-		*dest = malloc( WCH_SZ * ( size + 1 ) ) ;
-		memcpy( *dest , source , size * WCH_SZ ) ;
-		(*dest )[ size ] = L'\0' ;
+		*dest = malloc( CH_SZ * ( size + 1 ) ) ;
+		memcpy( *dest , source , size * CH_SZ ) ;
+		(*dest )[ size ] = '\0' ;
 	}
 
 	return *dest ;
 }
 
-char_t *
-wcsconcat( char_t *dest , char_t *source , char_t *add_str )
+char *
+strconcat( char *dest , char *source , char *add_str )
 {
 	uint	len_add_str	,
 		len_dest	;
-	char_t	*result		;
+	char	*result		;
 
-	len_add_str = wcslen( add_str ) ;
+	len_add_str = strlen( add_str ) ;
 	
 	if( len_add_str )
 	{
-		len_dest = wcslen( dest ) + wcslen( source ) + len_add_str + 1 ;
-		result = malloc( WCH_SZ * ( len_dest ) ) ;
-		*result = L'\0' ;
+		len_dest = strlen( dest ) + strlen( source ) + len_add_str + 1 ;
+		result = malloc( CH_SZ * ( len_dest ) ) ;
+		*result = '\0' ;
 
-		result = wcscat( result , dest ) ;
-		result = wcscat( result , add_str ) ;
+		result = strcat( result , dest ) ;
+		result = strcat( result , add_str ) ;
 	}
 	else
 	{
-		len_dest = wcslen( dest ) + wcslen( source ) + 1 ;
-		result = malloc( WCH_SZ * ( len_dest ) ) ;
-		*result = L'\0' ;
+		len_dest = strlen( dest ) + strlen( source ) + 1 ;
+		result = malloc( CH_SZ * ( len_dest ) ) ;
+		*result = '\0' ;
 
-		result = wcscat( result , dest ) ;
+		result = strcat( result , dest ) ;
 	}
 
-	result = wcscat( result , source ) ;
+	result = strcat( result , source ) ;
 
 	return result ;
 }
 
 uint
-wstrtou( const char_t *number , uint len )
+strtou( const char *number , uint len )
 {
 	uint	result	,
 		power	,
@@ -76,15 +76,15 @@ wstrtou( const char_t *number , uint len )
 		power *= 10 ;
 
 	for( ; len > 0 ; --len , ++number , power /= 10 )
-		result += ( *number - L'0' ) * power ;
+		result += ( *number - '0' ) * power ;
 
 	return result ;
 }
 
-char_t *
-uinttowcs( uint number , uint *len )
+char *
+utostr( uint number , uint *len )
 {
-	char_t		*buffer	,
+	char		*buffer	,
 			*pbuff	;
 	uint		tens	,
 			tnumber	;
@@ -96,15 +96,15 @@ uinttowcs( uint number , uint *len )
 	if( !number )
 		( *len )++ ;
 
-	pbuff = buffer = malloc( WCH_SZ * ( *len + 1 ) ) ;
-	buffer[ *len ] = L'\0' ;
+	pbuff = buffer = malloc( CH_SZ * ( *len + 1 ) ) ;
+	buffer[ *len ] = '\0' ;
 
 	if( !number )
-		*buffer = L'0' ;
+		*buffer = '0' ;
 
 	while( number )
 	{
-		*pbuff = number / tens + L'0' ;
+		*pbuff = number / tens + '0' ;
 		number -= ( ( number / tens ) * tens ) ;
 		pbuff++ ;
 	}
@@ -114,7 +114,7 @@ uinttowcs( uint number , uint *len )
 
 
 uint
-readTill( char_t **content , char_t *buffer , char_t *skip , size_t size_skip , char_t *till , size_t size_till )
+readTill( char **content , char *buffer , char *skip , size_t size_skip , char *till , size_t size_till )
 {
 	uint	ui_iter	,
 		ui_cnt	;
@@ -158,80 +158,80 @@ readTill( char_t **content , char_t *buffer , char_t *skip , size_t size_skip , 
 
 
 void
-preprocess_wstr( char_t *content )
+preprocess_str( char *content )
 {
-	for( ; !( !wcscmp( content , L"\n\n\0" ) || !wcscmp( content , L"\r\n\r\n\0" ) ) ; ++content )
+	for( ; !( !strcmp( content , "\n\n\0" ) || !strcmp( content , "\r\n\r\n\0" ) ) ; ++content )
 	{
-		if( *content == L'\r' )
-			*content = L' ' ;
+		if( *content == '\r' )
+			*content = ' ' ;
 	}
 }
 
 
 struct http_resp *
-parse_http( char_t *content )
+parse_http( char *content )
 {
-	struct http_resp		*resp		;
+	struct http_resp	*resp		;
 	struct field_parse	*root		,
 				*parser		,
 				*prev_field	,
 				*cur_field	;
-	char_t			*buffer		;
+	char			*buffer		;
 	uint			ui_cnt		,
 				ui_iter		,
 				ui_temp		,
 				ui_cnt_fields	;
 
-	buffer = malloc( WCH_SZ * BF_SZ ) ;
+	buffer = malloc( sizeof( char ) * BF_SZ ) ;
 	resp = calloc( 1 , sizeof( struct http_resp ) ) ;
 
-	preprocess_wstr( content ) ;
+	preprocess_str( content ) ;
 
-	ui_cnt = readTill( &content , buffer , NULL , 0 , L" " , 1 ) ;
+	ui_cnt = readTill( &content , buffer , NULL , 0 , " " , 1 ) ;
 
-	if( wcsncmp( buffer , L"HTTP" , 4 ) || ui_cnt < MIN_LEN_VER )
+	if( !strcmp( buffer , "HTTP\0" ) || ui_cnt < MIN_LEN_VER )
 	{
 		free( buffer ) ;
 		free( resp ) ;
 		return NULL ;
 	}
 
-	for( ui_iter = 0 ; ui_iter < ui_cnt && buffer[ ui_iter ] != L'/' ; ++ui_iter ) ;
-	for( ++ui_iter , ui_temp = ui_iter ; ui_iter < ui_cnt && buffer[ ui_iter ] != L'.' ; ++ui_iter ) ;
-	resp->version.major = wstrtou( &buffer[ ui_temp ] , ui_iter - ui_temp ) ;
+	for( ui_iter = 0 ; ui_iter < ui_cnt && buffer[ ui_iter ] != '/' ; ++ui_iter ) ;
+	for( ++ui_iter , ui_temp = ui_iter ; ui_iter < ui_cnt && buffer[ ui_iter ] != '.' ; ++ui_iter ) ;
+	resp->version.major = strtou( &buffer[ ui_temp ] , ui_iter - ui_temp ) ;
 	
-	if( buffer[ ui_iter ] == L'.' )
+	if( buffer[ ui_iter ] == '.' )
 	{
-		for( ++ui_iter , ui_temp = ui_iter ; ui_iter < ui_cnt && buffer[ ui_iter ] != L' ' ; ++ui_iter ) ;
-		resp->version.minor = wstrtou( &buffer[ ui_temp ] , ui_iter - ui_temp ) ;
+		for( ++ui_iter , ui_temp = ui_iter ; ui_iter < ui_cnt && buffer[ ui_iter ] != ' ' ; ++ui_iter ) ;
+		resp->version.minor = strtou( &buffer[ ui_temp ] , ui_iter - ui_temp ) ;
 	}
 	else
 	{
 		resp->version.minor = 0 ;
 	}
 
-	ui_cnt = readTill( &content , buffer , L" " , 1 , L" " , 1 ) ;
-	resp->r_code = wstrtou( buffer , ui_cnt ) ;
+	ui_cnt = readTill( &content , buffer , " " , 1 , " " , 1 ) ;
+	resp->r_code = strtou( buffer , ui_cnt ) ;
 
-	ui_cnt = readTill( &content , buffer , L" " , 1 , L"\n " , 2 ) ;
-	wcsnac( &resp->r_text , buffer , ui_cnt ) ;
+	ui_cnt = readTill( &content , buffer , " " , 1 , "\n " , 2 ) ;
+	strnac( &resp->r_text , buffer , ui_cnt ) ;
 
 	root = prev_field = parser = calloc( 1 , sizeof( struct field_parse ) ) ;
 
 	for( ui_cnt_fields = 0 ; prev_field ; )
 	{
-		ui_cnt = readTill( &content , buffer , L" " , 1 , L"\0\n:" , 34 ) ;
+		ui_cnt = readTill( &content , buffer , " " , 1 , "\0\n:" , 3 ) ;
 		if( ui_cnt )
 		{
-			wcsnac( &parser->name , buffer , ui_cnt ) ;
+			strnac( &parser->name , buffer , ui_cnt ) ;
 			++ui_cnt_fields ;
 
-			ui_cnt = readTill( &content , buffer , L" " , 1 , L"\0\n" , 2 ) ;
+			ui_cnt = readTill( &content , buffer , " " , 1 , "\0\n" , 2 ) ;
 
 			prev_field = parser ;
 			if( ui_cnt )
 			{
-				wcsnac( &parser->value , buffer , ui_cnt ) ;
+				strnac( &parser->value , buffer , ui_cnt ) ;
 				
 				parser->next = calloc( 1 , sizeof( struct field_parse ) ) ;
 				parser = parser->next ;
@@ -248,17 +248,17 @@ parse_http( char_t *content )
 		}
 	}
 
-	ui_cnt = readTill( &content , buffer , L"\n " , 1 , L"\0\n" , 2 ) ;
-	wcsnac( &resp->body , buffer , ui_cnt ) ;
+	ui_cnt = readTill( &content , buffer , "\n " , 2 , "\0" , 1 ) ;
+	strnac( &resp->body , buffer , ui_cnt ) ;
 
 	free( buffer ) ;
 
 	for( prev_field = root ; prev_field != NULL ; prev_field = prev_field->next )
 		for( parser = prev_field , cur_field = prev_field->next ; cur_field != NULL ; parser = cur_field , cur_field = cur_field->next )
-			if( !wcscmp( prev_field->name , cur_field->name ) )
+			if( !strcmp( prev_field->name , cur_field->name ) )
 			{
 				buffer = prev_field->value ;
-				prev_field->value = wcsconcat( prev_field->value , cur_field->value , L", \0" ) ;
+				prev_field->value = strconcat( prev_field->value , cur_field->value , ", \0" ) ;
 
 				parser->next = cur_field->next ;
 				
@@ -279,9 +279,9 @@ parse_http( char_t *content )
 
 		for( parser = root , ui_iter = 0 ; ui_iter < ui_cnt_fields ; parser = parser->next , ui_iter++ )
 		{
-			wcsnac( &resp->fields[ ui_iter ].name , parser->name , wcslen( parser->name ) ) ;
+			strnac( &resp->fields[ ui_iter ].name , parser->name , strlen( parser->name ) ) ;
 			if( parser->value )
-				wcsnac( &resp->fields[ ui_iter ].value , parser->value , wcslen( parser->value ) ) ;
+				strnac( &resp->fields[ ui_iter ].value , parser->value , strlen( parser->value ) ) ;
 		}
 	}
 
@@ -307,7 +307,7 @@ add_fields( int cnt , ... )
 	struct http_req	*req	;
 	va_list		vl	;
 	uint		ui_iter	;
-	char_t		*name	,
+	char		*name	,
 			*value	;
 
 	va_start( vl , cnt ) ;
@@ -328,11 +328,11 @@ add_fields( int cnt , ... )
 
 	for( ui_iter = 0 ; ui_iter < cnt ; ++ui_iter )
 	{
-		name = va_arg( vl , char_t* ) ;
-		value = va_arg( vl , char_t* ) ;
+		name = va_arg( vl , char* ) ;
+		value = va_arg( vl , char* ) ;
 
-		wcsnac( &req->fields[ ui_iter ].name , name , wcslen( name ) ) ;
-		wcsnac( &req->fields[ ui_iter ].value , value , wcslen( value ) ) ;
+		strnac( &req->fields[ ui_iter ].name , name , strlen( name ) ) ;
+		strnac( &req->fields[ ui_iter ].value , value , strlen( value ) ) ;
 	}
 
 	return cnt ;
@@ -340,12 +340,12 @@ add_fields( int cnt , ... )
 
 
 uint
-init_http_req( struct http_req *req , uint ver_major , uint ver_minor , char_t *path , char_t *method )
+init_http_req( struct http_req *req , uint ver_major , uint ver_minor , char *path , char *method )
 {
 	req->version.major = ver_major ;
 	req->version.minor = ver_minor ;
-	wcsnac( &req->path , path , wcslen( path ) ) ;
-	wcsnac( &req->method , method , wcslen( method ) ) ;
+	strnac( &req->path , path , strlen( path ) ) ;
+	strnac( &req->method , method , strlen( method ) ) ;
 
 	return 0 ;
 }
@@ -354,32 +354,32 @@ init_http_req( struct http_req *req , uint ver_major , uint ver_minor , char_t *
 	flags:
 		- 1 bit - use minor version
 */
-char_t *
+char *
 req_to_text( struct http_req *req , uint flags )
 {
 	uint	len_text	,
 		ui_iter		,
 		len_major	,
 		len_minor	;
-	char_t	*text		,
+	char	*text		,
 		*ptext		,
 		*major_ver	,
 		*minor_ver	;
 
 	minor_ver = major_ver = NULL ;
 
-	len_text = wcslen( req->method ) + 1 ; // Additional space
-	len_text += wcslen( req->path ) + 1 ; // Additional space
+	len_text = strlen( req->method ) + 1 ; // Additional space
+	len_text += strlen( req->path ) + 1 ; // Additional space
 
 	len_text += 5 ; // "HTTP/"
 
-	major_ver = uinttowcs( req->version.major , &len_major ) ;
+	major_ver = utostr( req->version.major , &len_major ) ;
 
 	len_text += len_major ;
 
 	if( flags & 1 )
 	{
-		minor_ver = uinttowcs( req->version.minor , &len_minor ) ;
+		minor_ver = utostr( req->version.minor , &len_minor ) ;
 
 		len_text += len_minor + 2 ; // . + {ver} + space
 	}
@@ -388,61 +388,61 @@ req_to_text( struct http_req *req , uint flags )
 
 	for( ui_iter = 0 ; ui_iter < req->f_cnt ; ++ui_iter )
 	{
-		len_text += wcslen( req->fields[ ui_iter ].name ) + 2 ; // Additional space and ':'
-		len_text += wcslen( req->fields[ ui_iter ].value ) + 1 ; // Additional '\n'
+		len_text += strlen( req->fields[ ui_iter ].name ) + 2 ; // Additional space and ':'
+		len_text += strlen( req->fields[ ui_iter ].value ) + 1 ; // Additional '\n'
 	}
 
 	len_text += 3 ; // Additional "\n\n\0"
 
-	ptext = text = malloc( WCH_SZ * len_text ) ;
-	*text = L'\0' ;
+	ptext = text = malloc( CH_SZ * len_text ) ;
+	*text = '\0' ;
 
-	wcscat( text , req->method ) ;
-	ptext += wcslen( req->method ) ;
-	*ptext++ = L' ' ;
-	*ptext = L'\0' ;
+	strcat( text , req->method ) ;
+	ptext += strlen( req->method ) ;
+	*ptext++ = ' ' ;
+	*ptext = '\0' ;
 
-	wcscat( text , req->path ) ;
-	ptext += wcslen( req->path ) ;
-	*ptext++ = L' ' ;
-	*ptext = L'\0' ;
+	strcat( text , req->path ) ;
+	ptext += strlen( req->path ) ;
+	*ptext++ = ' ' ;
+	*ptext = '\0' ;
 
-	wcscat( text , L"HTTP/\0" ) ;
+	strcat( text , "HTTP/\0" ) ;
 	ptext += 5 ;
 
-	wcscat( text , major_ver ) ;
+	strcat( text , major_ver ) ;
 	ptext += len_major ;
 
 	if( flags & 1 )
 	{
-		*ptext++ = L'.' ;
-		*ptext = L'\0' ;
+		*ptext++ = '.' ;
+		*ptext = '\0' ;
 
-		wcscat( text , minor_ver ) ;
+		strcat( text , minor_ver ) ;
 		ptext += len_minor ;
 	}
 
-	*ptext++ = L'\n' ;
-	*ptext = L'\0' ;
+	*ptext++ = '\n' ;
+	*ptext = '\0' ;
 
 	for( ui_iter = 0 ; ui_iter < req->f_cnt ; ++ui_iter )
 	{
-		wcscat( text , req->fields[ ui_iter ].name ) ;
-		ptext += wcslen( req->fields[ ui_iter ].name ) ;
+		strcat( text , req->fields[ ui_iter ].name ) ;
+		ptext += strlen( req->fields[ ui_iter ].name ) ;
 
-		*ptext++ = L':' ;
-		*ptext++ = L' ' ;
-		*ptext = L'\0' ;
+		*ptext++ = ':' ;
+		*ptext++ = ' ' ;
+		*ptext = '\0' ;
 
-		wcscat( text , req->fields[ ui_iter ].value ) ;
-		ptext += wcslen( req->fields[ ui_iter ].value ) ;
+		strcat( text , req->fields[ ui_iter ].value ) ;
+		ptext += strlen( req->fields[ ui_iter ].value ) ;
 
-		*ptext++ = L'\n' ;
-		*ptext = L'\0' ;
+		*ptext++ = '\n' ;
+		*ptext = '\0' ;
 	}
 
-	*ptext++ = L'\n' ;
-	*ptext = L'\0' ;
+	*ptext++ = '\n' ;
+	*ptext = '\0' ;
 
 	free( major_ver ) ;
 	if( minor_ver )

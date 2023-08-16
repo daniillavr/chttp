@@ -1,7 +1,7 @@
 TEMP_DIR=build
 VER=0.1
 
-all: test_build_win
+all: build.o_win
 debug: clean_out shared_debug static_debug
 
 shared:
@@ -20,6 +20,9 @@ static_debug:
 	mkdir -p $(TEMP_DIR)/out
 	gcc -g -Wall -Werror -DDEBUG -o $(TEMP_DIR)/libhttp.o -c http.c
 	ar rcs $(TEMP_DIR)/out/libhttp_$(VER).a $(TEMP_DIR)/http.o
+build.o_win:
+	-mkdir $(TEMP_DIR)\out
+	gcc -g -Wall -c -o $(TEMP_DIR)/http.o http.c
 clean_out:
 	rm -rf build/out
 clean_build:

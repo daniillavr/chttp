@@ -16,6 +16,7 @@
 #define	BF_SZ		( 1024 * 1024 )
 #define WCH_SZ		sizeof( wchar_t )
 #define char_t		wchar_t
+#define CH_SZ		sizeof( char )
 #define MS_SIZE		8
 #define MS_LEN		10
 #define MIN_LEN_VER	6
@@ -23,14 +24,14 @@
 struct
 field
 {
-	char_t	*name	,
+	char	*name	,
 		*value	;
 } ;
 
 struct
 field_parse
 {
-	char_t			*name	,
+	char			*name	,
 				*value	;
 	struct field_parse	*next	;
 } ;
@@ -46,8 +47,9 @@ http_resp
 		}	version		;
 	uint		r_code		,
 			f_cnt		;
-	char_t		*body		,
-			*r_text		;
+	char		*r_text		,
+			*body		;
+			
 
 } ;
 
@@ -61,20 +63,20 @@ http_req
 				minor	;
 		}	version		;
 	uint		f_cnt		;
-	char_t		*method		,
+	char		*method		,
 			*path		;
 } ;
 
 struct http_resp *
-parse_http( char_t * ) ;
+parse_http( char * ) ;
 
-char_t *
+char *
 uinttowcs( uint , uint * ) ;
-char_t *
+char *
 req_to_text( struct http_req * , uint ) ;
 
 uint
-init_http_req( struct http_req * , uint , uint , char_t * , char_t * ) ;
+init_http_req( struct http_req * , uint , uint , char * , char * ) ;
 uint
 add_fields( int , ... ) ;
 
