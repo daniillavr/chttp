@@ -1,7 +1,7 @@
 TEMP_DIR=build
 VER=0.1
 
-all: clean_out shared static
+all: test_build_win
 debug: clean_out shared_debug static_debug
 
 shared:
@@ -24,3 +24,9 @@ clean_out:
 	rm -rf build/out
 clean_build:
 	rm -rf build
+
+test_build_win:
+	-mkdir $(TEMP_DIR)\out
+	gcc -g -Wall -c -o $(TEMP_DIR)/http.o http.c
+	gcc -g -Wall -c -o $(TEMP_DIR)/main.o main.c
+	gcc -o main $(TEMP_DIR)/main.o $(TEMP_DIR)/http.o
