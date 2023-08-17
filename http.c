@@ -1,5 +1,16 @@
 #include "http.h"
 
+#define	uint		unsigned int
+#define uchar		unsigned char
+#define ull		unsigned long long
+#define	BF_SZ		( 1024 * 1024 )
+#define WCH_SZ		sizeof( wchar_t )
+#define char_t		wchar_t
+#define CH_SZ		sizeof( char )
+#define MS_SIZE		8
+#define MS_LEN		10
+#define MIN_LEN_VER	6
+
 char Methods[ MS_SIZE ][ MS_LEN ] =
 	{
 		"OPTIONS" ,
