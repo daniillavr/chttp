@@ -20,7 +20,7 @@ char Methods[ MS_SIZE ][ MS_LEN ] =
 		"CONNECT" ,
 	} ;
 
-char *
+static char *
 strnac( char **dest , char *source , uint size )
 {
 	if( !size )
@@ -35,7 +35,7 @@ strnac( char **dest , char *source , uint size )
 	return *dest ;
 }
 
-char *
+static char *
 strconcat( char *dest , char *source , char *add_str )
 {
 	uint	len_add_str	,
@@ -67,7 +67,7 @@ strconcat( char *dest , char *source , char *add_str )
 	return result ;
 }
 
-uint
+static uint
 strtou( const char *number , uint len )
 {
 	uint	result	,
@@ -89,7 +89,7 @@ strtou( const char *number , uint len )
 	return result ;
 }
 
-char *
+static char *
 utostr( uint number , uint *len )
 {
 	char		*buffer	,
@@ -121,7 +121,7 @@ utostr( uint number , uint *len )
 }
 
 
-uint
+static uint
 readTill( char **content , char *buffer , char *skip , size_t size_skip , char *till , size_t size_till )
 {
 	uint	ui_iter	,
@@ -165,7 +165,7 @@ readTill( char **content , char *buffer , char *skip , size_t size_skip , char *
 }
 
 
-void
+static void
 preprocess_str( char *content )
 {
 	for( ; !( !strcmp( content , "\n\n\0" ) || !strcmp( content , "\r\n\r\n\0" ) ) ; ++content )

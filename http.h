@@ -64,8 +64,6 @@ struct http_resp *
 parse_http( char * ) ;
 
 char *
-uinttowcs( uint , uint * ) ;
-char *
 req_to_text( struct http_req * , uint ) ;
 
 uint
