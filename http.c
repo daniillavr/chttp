@@ -1,8 +1,5 @@
 #include "http.h"
 
-#define	uint		unsigned int
-#define uchar		unsigned char
-#define ull		unsigned long long
 #define	BF_SZ		( 1024 * 1024 )
 #define WCH_SZ		sizeof( wchar_t )
 #define char_t		wchar_t
