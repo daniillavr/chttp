@@ -12,7 +12,6 @@
 
 #define	uint		unsigned int
 #define uchar		unsigned char
-#define ull		unsigned long long
 
 struct
 field
@@ -75,5 +74,8 @@ void
 free_http_resp( struct http_resp * ) ;
 void
 free_http_req( struct http_req * ) ;
+
+#undef uint
+#undef uchar
 
 #endif

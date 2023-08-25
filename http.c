@@ -7,6 +7,8 @@
 #define MS_SIZE		8
 #define MS_LEN		10
 #define MIN_LEN_VER	6
+#define	uint		unsigned int
+#define uchar		unsigned char
 
 char Methods[ MS_SIZE ][ MS_LEN ] =
 	{
